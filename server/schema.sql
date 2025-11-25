@@ -91,7 +91,6 @@ CREATE TABLE IF NOT EXISTS bookings (
     booking_status ENUM('unpaid','confirmed','checked_in','checked_out','cancelled') DEFAULT 'unpaid',
     check_in_date DATE NOT NULL,
     check_out_date DATE NOT NULL,
-    --duration INT GENERATED ALWAYS AS (DATEDIFF(check_out_date, check_in_date)) STORED,
     guests INT NOT NULL DEFAULT 1,
     total_amount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
     special_requests TEXT,

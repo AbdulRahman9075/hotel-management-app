@@ -17,7 +17,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(cors());
 app.use(express.json());
 
-// DB connection
 const db = mysql.createConnection({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
@@ -39,7 +38,6 @@ db.on('error', (err) => {
   console.error('Database error:', err);
 });
 
-// JWT middleware
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -51,15 +49,15 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// Helper: isAdmin
+
 const requireAdmin = (req, res, next) => {
   if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admin access required' });
   next();
 };
 
-// --------------------------
+
 // Authentication routes
-// --------------------------
+
 app.post('/api/register', async (req, res) => {
   try {
     const {email, password, role = 'customer', firstName, lastName, phone, cnic } = req.body;
@@ -123,9 +121,9 @@ app.post('/api/login', (req, res) => {
   }
 });
 
-// --------------------------
+
 // Rooms & Room types
-// --------------------------
+
 app.get('/api/room-types', (req, res) => {
   const q = 'SELECT * FROM room_types ORDER BY name';
   db.query(q, (err, rows) => {
@@ -195,29 +193,29 @@ app.get('/api/room-images/:roomTypeId', async (req, res) => {
 });
 
 
-app.put('/api/rooms/update-status',authenticateToken, async (req, res) => {
-  try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); 
+// app.put('/api/rooms/update-status',authenticateToken, async (req, res) => {
+//   try {
+//     const today = new Date();
+//     today.setHours(0, 0, 0, 0); 
 
-    const [result] = await db.query(`
-      UPDATE rooms r
-      JOIN bookings b ON r.id = b.room_id
-      SET r.status = 'available'
-      WHERE b.check_out_date < CURDATE() AND r.status = 'occupied'
-    `);
+//     const [result] = await db.query(`
+//       UPDATE rooms r
+//       JOIN bookings b ON r.id = b.room_id
+//       SET r.status = 'available'
+//       WHERE b.check_out_date < CURDATE() AND r.status = 'occupied'
+//     `);
 
-    res.json({ message: 'Rooms updated', affectedRows: result.affectedRows });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+//     res.json({ message: 'Rooms updated', affectedRows: result.affectedRows });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// });
 
 
-// --------------------------
+
 // Bookings
-// --------------------------
+
 
 app.post('/api/bookings', authenticateToken, (req, res) => {
   try {
@@ -227,14 +225,14 @@ app.post('/api/bookings', authenticateToken, (req, res) => {
     if (!room_id || !check_in_date || !check_out_date)
       return res.status(400).json({ message: 'Required fields missing' });
 
-    // Find customer id for this user
+
     db.query('SELECT id FROM customers WHERE user_id = ?', [userId], (err, custRows) => {
       if (err) return res.status(500).json({ message: 'Database error' });
       if (custRows.length === 0) return res.status(400).json({ message: 'Customer profile not found' });
 
       const customerId = custRows[0].id;
 
-      // Check availability 
+ 
       const availQ = `
         SELECT * FROM bookings
         WHERE room_id = ? AND booking_status IN ('confirmed','checked_in')
@@ -244,7 +242,7 @@ app.post('/api/bookings', authenticateToken, (req, res) => {
         if (err2) return res.status(500).json({ message: 'Database error' });
         if (conflicts.length > 0) return res.status(400).json({ message: 'Room not available for selected dates' });
 
-        // Price calculation:
+
         const priceQ = `
           SELECT COALESCE(r.price_per_night, rt.base_price) AS price
           FROM rooms r JOIN room_types rt ON r.room_type_id = rt.id
@@ -254,8 +252,6 @@ app.post('/api/bookings', authenticateToken, (req, res) => {
           if (err3) return res.status(500).json({ message: 'Database error' });
           if (priceRows.length === 0) return res.status(404).json({ message: 'Room not found' });
 
-
-          // Calculate nights 
           const nightsQ = `SELECT DATEDIFF(?,?) AS nights`;
           db.query(nightsQ, [check_out_date, check_in_date], (err4, nightsRows) => {
             if (err4) return res.status(500).json({ message: 'Database error' });
@@ -291,7 +287,7 @@ app.post('/api/bookings', authenticateToken, (req, res) => {
   }
 });
 
-// Get bookings for authenticated user (customers) or all if admin/staff
+
 app.get('/api/bookings', authenticateToken, (req, res) => {
   const role = req.user.role;
   const userId = req.user.userId;
@@ -331,9 +327,9 @@ app.put('/api/admin/bookings/:id', authenticateToken, requireAdmin, (req, res) =
   });
 });
 
-// --------------------------
+
 // Transactions / Payments
-// --------------------------
+
 app.post('/api/transactions', authenticateToken, (req, res) => {
   try {
     const { booking_id, amount, payment_method} = req.body;
@@ -354,9 +350,9 @@ app.post('/api/transactions', authenticateToken, (req, res) => {
   }
 });
 
-// --------------------------
+
 // Reviews
-// --------------------------
+
 app.post('/api/reviews', authenticateToken, (req, res) => {
   try {
     const { booking_id, rating, comment } = req.body;
@@ -388,9 +384,9 @@ app.post('/api/reviews', authenticateToken, (req, res) => {
   }
 });
 
-// --------------------------
+
 // Cleaning requests
-// --------------------------
+
 app.get('/api/cleaning-requests', (req, res) => {
   const q = 'SELECT * FROM cleaning_requests ORDER BY request_date';
   db.query(q, (err, rows) => {
@@ -478,7 +474,7 @@ app.post('/api/create-activity-log', authenticateToken, (req, res) => {
 app.get('/api/cleaning-request-details', authenticateToken, (req, res) => {
   const role = req.user.role;
   const userId = req.user.userId;
-
+  const completed = 'completed'
   let q = `
     SELECT cr.*,r.room_number,r.floor,rt.name AS room_type_name
     FROM cleaning_requests cr
@@ -486,13 +482,12 @@ app.get('/api/cleaning-request-details', authenticateToken, (req, res) => {
     JOIN staff s ON cs.staff_id = s.id
     JOIN bookings b ON cr.booking_id = b.id
     JOIN rooms r ON b.room_id = r.id
-    JOIN room_types rt ON r.room_type_id = rt.id
-
+    JOIN room_types rt ON r.room_type_id = rt.id 
   `;
   const params = [];
   if (role === 'staff') {
-    q += ' WHERE s.user_id = ?';
-    params.push(userId);
+    q += ' WHERE s.user_id = ? and cr.status not in(?) ';
+    params.push(userId,completed);
   }
   q += ' ORDER BY cr.request_date DESC';
 
@@ -504,9 +499,9 @@ app.get('/api/cleaning-request-details', authenticateToken, (req, res) => {
 
 
 
-// --------------------------
+
 // Admin dashboard (stats)
-// --------------------------
+
 app.get('/api/admin/dashboard', authenticateToken, requireAdmin, (req, res) => {
   const statsQ = `
     SELECT
@@ -596,9 +591,9 @@ app.get('/api/admin/report', authenticateToken, requireAdmin, (req, res) => {
 
 
 
-// --------------------------
+
 // Admin: users & rooms endpoints
-// --------------------------
+
 app.get('/api/admin/users', authenticateToken, requireAdmin, (req, res) => {
   const q = 'SELECT id, cnic, email, role, first_name, last_name, phone, created_at FROM users ORDER BY created_at DESC';
   db.query(q, (err, rows) => {
@@ -653,9 +648,9 @@ app.get('/api/admin/rooms', authenticateToken, requireAdmin, (req, res) => {
   });
 });
 
-// --------------------------
+
 // Debug / health
-// --------------------------
+
 app.get('/api/test/db', (req, res) => {
   db.query('SELECT 1 + 1 AS result', (err, rows) => {
     if (err) {

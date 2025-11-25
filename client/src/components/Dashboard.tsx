@@ -176,8 +176,8 @@ const Dashboard = () => {
                   </Box>
                   <Typography variant="h6" sx={{ opacity: 0.9, fontWeight: 400 }}>
                     {user?.role === 'admin' 
-                      ? 'Manage your hotel operations and monitor performance metrics.'
-                      : 'Experience luxury accommodations and world-class service.'
+                      ? ''
+                      : ''
                     }
                   </Typography>
                 </Grid>
@@ -199,7 +199,7 @@ const Dashboard = () => {
               </Grid>
             </Paper>
           </Fade>          {/* Stats Cards for Admin */}
-          {user?.role === 'admin' && (
+          {/* {user?.role === 'admin' && (
             <Fade in={true} timeout={1000}>
               <Grid container spacing={3} sx={{ mb: 4 }}>
                 <Grid item xs={12} sm={6} md={3} component="div" {...({} as GridProps)}>
@@ -255,7 +255,7 @@ const Dashboard = () => {
                 </Grid>
               </Grid>
             </Fade>
-          )}
+          )} */}
 
           {/* Quick Actions */}
           <Typography variant="h4" sx={{ fontWeight: 600, mb: 3, textAlign: 'center' }}>

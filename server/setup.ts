@@ -18,8 +18,8 @@ async function setup() {
     connection = await mysql.createConnection(dbConfig);
     console.log('Connected to database successfully');
 
-    // First, clean up existing data to avoid conflicts
-    console.log('🧹 Cleaning up existing data...');
+
+    console.log('Cleaning up existing data...');
     await connection.execute('DELETE FROM booking_services');
     await connection.execute('DELETE FROM services');
 
@@ -41,7 +41,7 @@ async function setup() {
     await connection.execute('DELETE FROM users');
     console.log('Cleaned up existing data');
 
-    // Create demo users with hashed passwords
+    
     console.log('Creating demo users...');
     const adminPasswordHash = await bcrypt.hash('admin123', 10);
     const customerPasswordHash = await bcrypt.hash('customer123', 10);
@@ -119,17 +119,17 @@ async function setup() {
       );
       roomTypeIds.push(result.insertId);
       console.log(`Created room type: ${name} (ID: ${result.insertId})`);
-    }    // Create rooms using the actual room type IDs
+    }    
     console.log('Creating rooms...');
     const rooms = [
-      [101, roomTypeIds[0], 1,50.00], // Standard Double, Floor 1
-      [102, roomTypeIds[0], 1,50.00], // Standard Double, Floor 1
-      [103, roomTypeIds[0], 1,50.00], // Standard Double, Floor 1
-      [201, roomTypeIds[1], 2,80.00], // Deluxe Suite, Floor 2
-      [202, roomTypeIds[1], 2,80.00], // Deluxe Suite, Floor 2
-      [301, roomTypeIds[2], 3,220.00], // Family Room, Floor 3
-      [302, roomTypeIds[2], 3,220.00], // Family Room, Floor 3
-      [401, roomTypeIds[2], 4,220.00]  // Presidential Suite, Floor 4
+      [101, roomTypeIds[0], 1,50.00],
+      [102, roomTypeIds[0], 1,50.00], 
+      [103, roomTypeIds[0], 1,50.00], 
+      [201, roomTypeIds[1], 2,80.00], 
+      [202, roomTypeIds[1], 2,80.00], 
+      [301, roomTypeIds[2], 3,220.00], 
+      [302, roomTypeIds[2], 3,220.00], 
+      [401, roomTypeIds[2], 4,220.00]  
     ];
 
     for (const [roomNumber, roomTypeId, floor,price] of rooms) {
@@ -138,7 +138,7 @@ async function setup() {
         [roomNumber, roomTypeId, floor, 'available',price]
       );
       console.log(`Created room: ${roomNumber}`);
-    }    // Create services
+    }    
     console.log('Creating services...');
     const services = [
       ['Room Service', 'Convenient room service for meals and drinks', 25.00, 'food'],
@@ -156,7 +156,7 @@ async function setup() {
       console.log(`Created service: ${name}`);
     }
 
-    // Verify the setup
+    
     console.log('\nSetup Summary:');
     
     const [userCount] = await connection.execute('SELECT COUNT(*) as count FROM users');
@@ -172,11 +172,6 @@ async function setup() {
     console.log(`Services: ${serviceCount[0].count}`);
 
     console.log('\nSetup completed successfully!');
-    // console.log('\nDemo Accounts:');
-    // console.log(' Admin: admin@hotel.com / admin123');
-    // console.log(' Customer: john@example.com / customer123');
-    // console.log(' Customer: john@example.com / customer123');
-    // console.log(' Customer: john@example.com / customer123');
 
   } catch (error) {
     console.error('[FAIL] Setup failed:', error.message);

@@ -674,6 +674,8 @@ const AdminDashboard = () => {
                   value={selectedBooking.booking_status}
                   onChange={(e) => setSelectedBooking({ ...selectedBooking, status: e.target.value })}
                 >
+                  <MenuItem value="checked_in">Checked In</MenuItem>
+                  <MenuItem value="checked_out">Checked Out</MenuItem>
                   <MenuItem value="confirmed">Confirmed</MenuItem>
                   <MenuItem value="cancelled">Cancelled</MenuItem>
                 </TextField>

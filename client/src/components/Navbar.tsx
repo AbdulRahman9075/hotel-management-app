@@ -81,7 +81,7 @@ const Navbar = () => {
               letterSpacing: '-0.5px'
             }}
           >
-            Luxury Hotel
+             Hotel Hilltop
           </Typography>
         </Box>
         
