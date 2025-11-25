@@ -27,6 +27,7 @@ out/
 logs/
 *.log
 npm-debug.log*
+.github
 
 # Runtime data
 pids/
@@ -83,7 +84,6 @@ dist
 
 # Gatsby files
 .cache/
-public
 
 # Storybook build outputs
 .out
